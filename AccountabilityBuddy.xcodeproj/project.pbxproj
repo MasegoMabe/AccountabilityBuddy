@@ -8,12 +8,22 @@
 
 /* Begin PBXBuildFile section */
 		B8B4393A2F7DA11600FD917D /* AccountabilityBuddyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8B439392F7DA11600FD917D /* AccountabilityBuddyApp.swift */; };
-		B8B4393C2F7DA11600FD917D /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8B4393B2F7DA11600FD917D /* ContentView.swift */; };
+		B8B4393C2F7DA11600FD917D /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8B4393B2F7DA11600FD917D /* HomeView.swift */; };
 		B8B4393E2F7DA11900FD917D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B8B4393D2F7DA11900FD917D /* Assets.xcassets */; };
 		B8B439412F7DA11900FD917D /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B8B439402F7DA11900FD917D /* Preview Assets.xcassets */; };
 		B8B4394B2F7DA11A00FD917D /* AccountabilityBuddyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8B4394A2F7DA11A00FD917D /* AccountabilityBuddyTests.swift */; };
 		B8B439552F7DA11A00FD917D /* AccountabilityBuddyUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8B439542F7DA11A00FD917D /* AccountabilityBuddyUITests.swift */; };
 		B8B439572F7DA11A00FD917D /* AccountabilityBuddyUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8B439562F7DA11A00FD917D /* AccountabilityBuddyUITestsLaunchTests.swift */; };
+		B8B439682F7DA1E800FD917D /* ReflectionEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8B439672F7DA1E800FD917D /* ReflectionEntry.swift */; };
+		B8B4396A2F7DA20E00FD917D /* EntryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8B439692F7DA20E00FD917D /* EntryStore.swift */; };
+		B8B4396C2F7DA23500FD917D /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8B4396B2F7DA23500FD917D /* NotificationManager.swift */; };
+		B8B4396E2F7DA25500FD917D /* HomeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8B4396D2F7DA25500FD917D /* HomeViewModel.swift */; };
+		B8B439702F7DA28A00FD917D /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8B4396F2F7DA28A00FD917D /* HistoryView.swift */; };
+		B8B439722F7DA2A700FD917D /* StatsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8B439712F7DA2A700FD917D /* StatsView.swift */; };
+		B8B439742F7DA85C00FD917D /* EntryDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8B439732F7DA85C00FD917D /* EntryDetailView.swift */; };
+		B8B439762F7DA99E00FD917D /* EditEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8B439752F7DA99E00FD917D /* EditEntryView.swift */; };
+		B8B439782F7DAB3900FD917D /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8B439772F7DAB3900FD917D /* SettingsView.swift */; };
+		B8B4397A2F7DADA200FD917D /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8B439792F7DADA200FD917D /* OnboardingView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -36,7 +46,7 @@
 /* Begin PBXFileReference section */
 		B8B439362F7DA11500FD917D /* AccountabilityBuddy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AccountabilityBuddy.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B8B439392F7DA11600FD917D /* AccountabilityBuddyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountabilityBuddyApp.swift; sourceTree = "<group>"; };
-		B8B4393B2F7DA11600FD917D /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		B8B4393B2F7DA11600FD917D /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		B8B4393D2F7DA11900FD917D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B8B439402F7DA11900FD917D /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		B8B439462F7DA11A00FD917D /* AccountabilityBuddyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AccountabilityBuddyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -44,6 +54,16 @@
 		B8B439502F7DA11A00FD917D /* AccountabilityBuddyUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AccountabilityBuddyUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B8B439542F7DA11A00FD917D /* AccountabilityBuddyUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountabilityBuddyUITests.swift; sourceTree = "<group>"; };
 		B8B439562F7DA11A00FD917D /* AccountabilityBuddyUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountabilityBuddyUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		B8B439672F7DA1E800FD917D /* ReflectionEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReflectionEntry.swift; sourceTree = "<group>"; };
+		B8B439692F7DA20E00FD917D /* EntryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntryStore.swift; sourceTree = "<group>"; };
+		B8B4396B2F7DA23500FD917D /* NotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
+		B8B4396D2F7DA25500FD917D /* HomeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewModel.swift; sourceTree = "<group>"; };
+		B8B4396F2F7DA28A00FD917D /* HistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
+		B8B439712F7DA2A700FD917D /* StatsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsView.swift; sourceTree = "<group>"; };
+		B8B439732F7DA85C00FD917D /* EntryDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntryDetailView.swift; sourceTree = "<group>"; };
+		B8B439752F7DA99E00FD917D /* EditEntryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditEntryView.swift; sourceTree = "<group>"; };
+		B8B439772F7DAB3900FD917D /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		B8B439792F7DADA200FD917D /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -74,6 +94,10 @@
 		B8B4392D2F7DA11500FD917D = {
 			isa = PBXGroup;
 			children = (
+				B8B439662F7DA15300FD917D /* Views */,
+				B8B439652F7DA13F00FD917D /* ViewModels */,
+				B8B439642F7DA13700FD917D /* Services */,
+				B8B439632F7DA12B00FD917D /* Models */,
 				B8B439382F7DA11500FD917D /* AccountabilityBuddy */,
 				B8B439492F7DA11A00FD917D /* AccountabilityBuddyTests */,
 				B8B439532F7DA11A00FD917D /* AccountabilityBuddyUITests */,
@@ -95,7 +119,6 @@
 			isa = PBXGroup;
 			children = (
 				B8B439392F7DA11600FD917D /* AccountabilityBuddyApp.swift */,
-				B8B4393B2F7DA11600FD917D /* ContentView.swift */,
 				B8B4393D2F7DA11900FD917D /* Assets.xcassets */,
 				B8B4393F2F7DA11900FD917D /* Preview Content */,
 			);
@@ -125,6 +148,45 @@
 				B8B439562F7DA11A00FD917D /* AccountabilityBuddyUITestsLaunchTests.swift */,
 			);
 			path = AccountabilityBuddyUITests;
+			sourceTree = "<group>";
+		};
+		B8B439632F7DA12B00FD917D /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				B8B439672F7DA1E800FD917D /* ReflectionEntry.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		B8B439642F7DA13700FD917D /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				B8B439692F7DA20E00FD917D /* EntryStore.swift */,
+				B8B4396B2F7DA23500FD917D /* NotificationManager.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		B8B439652F7DA13F00FD917D /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				B8B4396D2F7DA25500FD917D /* HomeViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		B8B439662F7DA15300FD917D /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				B8B4393B2F7DA11600FD917D /* HomeView.swift */,
+				B8B4396F2F7DA28A00FD917D /* HistoryView.swift */,
+				B8B439712F7DA2A700FD917D /* StatsView.swift */,
+				B8B439732F7DA85C00FD917D /* EntryDetailView.swift */,
+				B8B439752F7DA99E00FD917D /* EditEntryView.swift */,
+				B8B439772F7DAB3900FD917D /* SettingsView.swift */,
+				B8B439792F7DADA200FD917D /* OnboardingView.swift */,
+			);
+			path = Views;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -257,8 +319,18 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B8B4393C2F7DA11600FD917D /* ContentView.swift in Sources */,
+				B8B439702F7DA28A00FD917D /* HistoryView.swift in Sources */,
+				B8B439762F7DA99E00FD917D /* EditEntryView.swift in Sources */,
+				B8B4393C2F7DA11600FD917D /* HomeView.swift in Sources */,
+				B8B4396E2F7DA25500FD917D /* HomeViewModel.swift in Sources */,
+				B8B439682F7DA1E800FD917D /* ReflectionEntry.swift in Sources */,
+				B8B439722F7DA2A700FD917D /* StatsView.swift in Sources */,
+				B8B4396C2F7DA23500FD917D /* NotificationManager.swift in Sources */,
+				B8B439742F7DA85C00FD917D /* EntryDetailView.swift in Sources */,
+				B8B4396A2F7DA20E00FD917D /* EntryStore.swift in Sources */,
+				B8B4397A2F7DADA200FD917D /* OnboardingView.swift in Sources */,
 				B8B4393A2F7DA11600FD917D /* AccountabilityBuddyApp.swift in Sources */,
+				B8B439782F7DAB3900FD917D /* SettingsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -417,6 +489,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"AccountabilityBuddy/Preview Content\"";
+				DEVELOPMENT_TEAM = 6PTFFF46JU;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -445,6 +518,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"AccountabilityBuddy/Preview Content\"";
+				DEVELOPMENT_TEAM = 6PTFFF46JU;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
