@@ -12,42 +12,55 @@ struct HistoryView: View {
 
     var body: some View {
         NavigationStack {
-            List {
+            ZStack {
+                AppTheme.background
+                    .ignoresSafeArea()
+
                 if viewModel.entries.isEmpty {
-                    VStack(spacing: 12) {
+                    VStack(spacing: 16) {
                         Image(systemName: "square.and.pencil")
-                            .font(.system(size: 40))
-                            .foregroundStyle(.gray)
+                            .font(.system(size: 46))
+                            .foregroundStyle(AppTheme.plum)
 
                         Text("No entries yet")
-                            .font(.headline)
+                            .font(.title3.bold())
+                            .foregroundStyle(AppTheme.textPrimary)
 
                         Text("Your daily check-ins will appear here.")
                             .font(.subheadline)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(AppTheme.textSecondary)
                             .multilineTextAlignment(.center)
                     }
-                    .frame(maxWidth: .infinity, minHeight: 300)
+                    .padding()
                 } else {
-                    ForEach(viewModel.entries) { entry in
-                        NavigationLink(destination: EntryDetailView(entryID: entry.id)) {
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text(entry.date.formatted(date: .abbreviated, time: .omitted))
-                                    .font(.headline)
+                    List {
+                        ForEach(viewModel.entries) { entry in
+                            NavigationLink(destination: EntryDetailView(entryID: entry.id)) {
+                                VStack(alignment: .leading, spacing: 8) {
+                                    Text(entry.date.formatted(date: .abbreviated, time: .omitted))
+                                        .font(.headline)
+                                        .foregroundStyle(AppTheme.deepPlum)
 
-                                Text("Learned: \(entry.learnedToday)")
-                                    .lineLimit(1)
+                                    Text("Learned: \(entry.learnedToday)")
+                                        .lineLimit(1)
+                                        .foregroundStyle(AppTheme.textPrimary)
 
-                                Text("Avoided: \(entry.avoidedToday)")
-                                    .lineLimit(1)
+                                    Text("Avoided: \(entry.avoidedToday)")
+                                        .lineLimit(1)
+                                        .foregroundStyle(AppTheme.textPrimary)
 
-                                Text("Small win: \(entry.smallWin)")
-                                    .lineLimit(1)
+                                    Text("Small win: \(entry.smallWin)")
+                                        .lineLimit(1)
+                                        .foregroundStyle(AppTheme.textPrimary)
+                                }
+                                .padding(.vertical, 8)
                             }
-                            .padding(.vertical, 6)
+                            .listRowBackground(AppTheme.cardBackground)
                         }
+                        .onDelete(perform: viewModel.deleteEntries)
                     }
-                    .onDelete(perform: viewModel.deleteEntries)
+                    .scrollContentBackground(.hidden)
+                    .listStyle(.plain)
                 }
             }
             .navigationTitle("History")

@@ -41,7 +41,7 @@ struct AccountabilityBuddyApp: App {
                         }
                 }
                 .environmentObject(viewModel)
-                .tint(.purple)
+                .tint(AppTheme.plum)
             } else {
                 OnboardingView()
                     .environmentObject(viewModel)

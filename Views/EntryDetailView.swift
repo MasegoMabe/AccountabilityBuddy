@@ -16,54 +16,47 @@ struct EntryDetailView: View {
     }
 
     var body: some View {
-        Group {
-            if let entry {
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 20) {
-                        Text(entry.date.formatted(date: .complete, time: .omitted))
-                            .font(.title2.bold())
+        ZStack {
+            AppTheme.background
+                .ignoresSafeArea()
 
-                        detailCard(
-                            title: viewModel.promptOne,
-                            text: entry.learnedToday
-                        )
+            Group {
+                if let entry {
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 20) {
+                            Text(entry.date.formatted(date: .complete, time: .omitted))
+                                .font(.title2.bold())
+                                .foregroundStyle(AppTheme.textPrimary)
 
-                        detailCard(
-                            title: viewModel.promptTwo,
-                            text: entry.avoidedToday
-                        )
+                            detailCard(title: viewModel.promptOne, text: entry.learnedToday)
+                            detailCard(title: viewModel.promptTwo, text: entry.avoidedToday)
+                            detailCard(title: viewModel.promptThree, text: entry.smallWin)
 
-                        detailCard(
-                            title: viewModel.promptThree,
-                            text: entry.smallWin
-                        )
-
-                        if let aiReflection = entry.aiReflection, !aiReflection.isEmpty {
-                            detailCard(
-                                title: "AI Reflection",
-                                text: aiReflection
-                            )
+                            if let aiReflection = entry.aiReflection, !aiReflection.isEmpty {
+                                detailCard(title: "AI Reflection", text: aiReflection)
+                            }
+                        }
+                        .padding()
+                    }
+                    .toolbar {
+                        NavigationLink("Edit") {
+                            EditEntryView(entry: entry)
+                                .environmentObject(viewModel)
                         }
                     }
+                } else {
+                    VStack(spacing: 12) {
+                        Image(systemName: "exclamationmark.circle")
+                            .font(.system(size: 40))
+                            .foregroundStyle(AppTheme.plum)
+
+                        Text("Entry not found")
+                            .font(.headline)
+                            .foregroundStyle(AppTheme.textPrimary)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .padding()
                 }
-                .toolbar {
-                    NavigationLink("Edit") {
-                        EditEntryView(entry: entry)
-                            .environmentObject(viewModel)
-                    }
-                }
-            } else {
-                VStack(spacing: 12) {
-                    Image(systemName: "exclamationmark.circle")
-                        .font(.system(size: 40))
-                        .foregroundStyle(.gray)
-
-                    Text("Entry not found")
-                        .font(.headline)
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .padding()
             }
         }
         .navigationTitle("Entry")
@@ -75,13 +68,12 @@ struct EntryDetailView: View {
         VStack(alignment: .leading, spacing: 8) {
             Text(title)
                 .font(.headline)
+                .foregroundStyle(AppTheme.textPrimary)
 
             Text(text)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(AppTheme.textSecondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding()
-        .background(Color(.secondarySystemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .softCard()
     }
 }

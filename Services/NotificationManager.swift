@@ -23,7 +23,6 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
                 return
             }
 
-            print("Notification permission granted: \(granted)")
             completion(granted)
         }
     }
@@ -34,35 +33,107 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
         }
     }
 
-    func scheduleDailyReminder(hour: Int, minute: Int) {
+    func scheduleTomorrowMorningReminder(hour: Int, minute: Int, tasks: [String], verseReference: String) {
         let center = UNUserNotificationCenter.current()
-        center.removePendingNotificationRequests(withIdentifiers: ["daily_accountability_reminder"])
+        center.removePendingNotificationRequests(withIdentifiers: ["tomorrow_morning_plan_reminder"])
+
+        let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: Date()) ?? Date()
+        var components = Calendar.current.dateComponents([.year, .month, .day], from: tomorrow)
+        components.hour = hour
+        components.minute = minute
+
+        let preview = tasks.prefix(3).joined(separator: " • ")
+        let body = tasks.isEmpty
+        ? "Good morning. Open Accountability Buddy and plan your day. \(verseReference)"
+        : "Today: \(preview). \(verseReference)"
+
+        let content = UNMutableNotificationContent()
+        content.title = "Good morning ☀️"
+        content.body = body
+        content.sound = .default
+
+        let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
+
+        let request = UNNotificationRequest(
+            identifier: "tomorrow_morning_plan_reminder",
+            content: content,
+            trigger: trigger
+        )
+
+        center.add(request)
+    }
+
+    func scheduleNightPlanningReminder(hour: Int, minute: Int) {
+        let center = UNUserNotificationCenter.current()
+        center.removePendingNotificationRequests(withIdentifiers: ["night_planning_reminder"])
 
         var components = DateComponents()
         components.hour = hour
         components.minute = minute
 
         let content = UNMutableNotificationContent()
-        content.title = "Accountability Buddy"
-        content.body = "What did you learn today?"
+        content.title = "Plan tomorrow"
+        content.body = "Write tomorrow’s tasks tonight so morning-you is not confused."
         content.sound = .default
 
         let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: true)
 
         let request = UNNotificationRequest(
-            identifier: "daily_accountability_reminder",
+            identifier: "night_planning_reminder",
             content: content,
             trigger: trigger
         )
 
-        center.add(request) { error in
-            if let error = error {
-                print("Failed to schedule notification: \(error.localizedDescription)")
-            } else {
-                print("Daily reminder scheduled for \(hour):\(String(format: "%02d", minute))")
-                self.printPendingNotifications()
-            }
-        }
+        center.add(request)
+    }
+
+    func scheduleNightCheckInReminder(hour: Int, minute: Int) {
+        let center = UNUserNotificationCenter.current()
+        center.removePendingNotificationRequests(withIdentifiers: ["night_checkin_reminder"])
+
+        var components = DateComponents()
+        components.hour = hour
+        components.minute = minute
+
+        let content = UNMutableNotificationContent()
+        content.title = "Night check-in"
+        content.body = "How did today go? Do your reflection before you sleep."
+        content.sound = .default
+
+        let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: true)
+
+        let request = UNNotificationRequest(
+            identifier: "night_checkin_reminder",
+            content: content,
+            trigger: trigger
+        )
+
+        center.add(request)
+    }
+
+    func scheduleFridayReminder(hour: Int, minute: Int) {
+        let center = UNUserNotificationCenter.current()
+        center.removePendingNotificationRequests(withIdentifiers: ["friday_submission_reminder"])
+
+        var components = DateComponents()
+        components.weekday = 6
+        components.hour = hour
+        components.minute = minute
+
+        let content = UNMutableNotificationContent()
+        content.title = "Friday review"
+        content.body = "Check what needs to be submitted for the coming week — Friday to Friday."
+        content.sound = .default
+
+        let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: true)
+
+        let request = UNNotificationRequest(
+            identifier: "friday_submission_reminder",
+            content: content,
+            trigger: trigger
+        )
+
+        center.add(request)
     }
 
     func scheduleTestReminder() {
@@ -72,8 +143,6 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
                 self.requestPermission { granted in
                     if granted {
                         self.scheduleTestNotificationNow()
-                    } else {
-                        print("Test notification permission not granted.")
                     }
                 }
 
@@ -106,32 +175,13 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
             trigger: trigger
         )
 
-        center.add(request) { error in
-            if let error = error {
-                print("Failed to schedule test notification: \(error.localizedDescription)")
-            } else {
-                print("Test notification scheduled for 5 seconds from now")
-                self.printPendingNotifications()
-            }
-        }
-    }
-
-    func printPendingNotifications() {
-        UNUserNotificationCenter.current().getPendingNotificationRequests { requests in
-            print("Pending notifications count: \(requests.count)")
-            for request in requests {
-                print("Identifier: \(request.identifier)")
-                print("Title: \(request.content.title)")
-                print("Body: \(request.content.body)")
-                print("-----")
-            }
-        }
+        center.add(request)
     }
 
     func userNotificationCenter(
         _ center: UNUserNotificationCenter,
         willPresent notification: UNNotification
     ) async -> UNNotificationPresentationOptions {
-        return [.banner, .sound, .badge]
+        [.banner, .sound, .badge]
     }
 }

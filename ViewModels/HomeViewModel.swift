@@ -12,26 +12,58 @@ final class HomeViewModel: ObservableObject {
     @Published var learnedToday = ""
     @Published var avoidedToday = ""
     @Published var smallWin = ""
+
     @Published var entries: [ReflectionEntry] = []
+    @Published var plans: [DayPlan] = []
+
+    @Published var todayTaskInput = ""
+    @Published var tomorrowTaskInput = ""
+    @Published var tomorrowNotes = ""
+
     @Published var dailyPromptTime: Date = Calendar.current.date(bySettingHour: 20, minute: 0, second: 0, of: Date()) ?? Date()
+    @Published var morningReminderTime: Date = Calendar.current.date(bySettingHour: 7, minute: 0, second: 0, of: Date()) ?? Date()
+    @Published var nightPlanningTime: Date = Calendar.current.date(bySettingHour: 21, minute: 0, second: 0, of: Date()) ?? Date()
+    @Published var nightCheckInTime: Date = Calendar.current.date(bySettingHour: 21, minute: 30, second: 0, of: Date()) ?? Date()
+    @Published var fridayReminderTime: Date = Calendar.current.date(bySettingHour: 18, minute: 0, second: 0, of: Date()) ?? Date()
+
     @Published var showAlert = false
     @Published var alertMessage = ""
     @Published var aiReflectionEnabled = false
     @Published var hasCompletedOnboarding = UserDefaults.standard.bool(forKey: "has_completed_onboarding")
+
     @Published var promptOne = UserDefaults.standard.string(forKey: "prompt_one") ?? "What did you learn today?"
     @Published var promptTwo = UserDefaults.standard.string(forKey: "prompt_two") ?? "What did you avoid today?"
     @Published var promptThree = UserDefaults.standard.string(forKey: "prompt_three") ?? "What’s one small win?"
 
+    @Published var todayVerse: BibleVerse = BibleVerseProvider.verseForToday()
+
     private let store = EntryStore()
-    private let reminderTimeKey = "daily_prompt_time"
-    
+    private let planStore = PlanStore()
+
+    private let dailyReminderTimeKey = "daily_prompt_time"
+    private let morningReminderTimeKey = "morning_reminder_time"
+    private let nightPlanningTimeKey = "night_planning_time"
+    private let nightCheckInTimeKey = "night_checkin_time"
+    private let fridayReminderTimeKey = "friday_reminder_time"
+
     init() {
         loadEntries()
-        loadReminderTime()
+        loadPlans()
+        loadReminderTimes()
+        refreshVerse()
+        prepareTomorrowDraftFromExistingPlan()
+    }
+
+    func refreshVerse() {
+        todayVerse = BibleVerseProvider.verseForToday()
     }
 
     func loadEntries() {
         entries = store.load().sorted(by: { $0.date > $1.date })
+    }
+
+    func loadPlans() {
+        plans = planStore.load().sorted(by: { $0.date > $1.date })
     }
 
     func saveTodayEntry() {
@@ -71,6 +103,10 @@ final class HomeViewModel: ObservableObject {
         entries.contains { Calendar.current.isDateInToday($0.date) }
     }
 
+    func totalEntries() -> Int {
+        entries.count
+    }
+
     func currentStreak() -> Int {
         let sortedDates = entries
             .map { Calendar.current.startOfDay(for: $0.date) }
@@ -106,36 +142,114 @@ final class HomeViewModel: ObservableObject {
         return streak
     }
 
-    func scheduleReminder() {
-        saveReminderTime()
+    func todayPlan() -> DayPlan {
+        let today = Calendar.current.startOfDay(for: Date())
+        if let existing = plans.first(where: { Calendar.current.isDate($0.date, inSameDayAs: today) }) {
+            return existing
+        }
+
+        let newPlan = DayPlan(date: today)
+        plans.append(newPlan)
+        savePlans()
+        return newPlan
+    }
+
+    func tomorrowPlan() -> DayPlan {
+        let tomorrow = Calendar.current.startOfDay(for: Calendar.current.date(byAdding: .day, value: 1, to: Date()) ?? Date())
+        if let existing = plans.first(where: { Calendar.current.isDate($0.date, inSameDayAs: tomorrow) }) {
+            return existing
+        }
+
+        let newPlan = DayPlan(date: tomorrow)
+        plans.append(newPlan)
+        savePlans()
+        return newPlan
+    }
+
+    func todayTasks() -> [DailyTask] {
+        todayPlan().tasks
+    }
+
+    func tomorrowTasks() -> [DailyTask] {
+        tomorrowPlan().tasks
+    }
+
+    func addTaskToToday() {
+        let trimmed = todayTaskInput.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+
+        var plan = todayPlan()
+        plan.tasks.append(DailyTask(title: trimmed))
+        upsertPlan(plan)
+
+        todayTaskInput = ""
+    }
+
+    func addTaskToTomorrow() {
+        let trimmed = tomorrowTaskInput.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+
+        var plan = tomorrowPlan()
+        plan.tasks.append(DailyTask(title: trimmed))
+        plan.notes = tomorrowNotes
+        upsertPlan(plan)
+
+        tomorrowTaskInput = ""
+    }
+
+    func toggleTodayTask(_ task: DailyTask) {
+        var plan = todayPlan()
+        guard let index = plan.tasks.firstIndex(where: { $0.id == task.id }) else { return }
+        plan.tasks[index].isCompleted.toggle()
+        upsertPlan(plan)
+    }
+
+    func deleteTodayTasks(at offsets: IndexSet) {
+        var plan = todayPlan()
+        plan.tasks.remove(atOffsets: offsets)
+        upsertPlan(plan)
+    }
+
+    func deleteTomorrowTasks(at offsets: IndexSet) {
+        var plan = tomorrowPlan()
+        plan.tasks.remove(atOffsets: offsets)
+        upsertPlan(plan)
+    }
+
+    func saveTomorrowNotes() {
+        var plan = tomorrowPlan()
+        plan.notes = tomorrowNotes.trimmingCharacters(in: .whitespacesAndNewlines)
+        upsertPlan(plan)
+    }
+
+    func completedTaskCountToday() -> Int {
+        todayTasks().filter { $0.isCompleted }.count
+    }
+
+    func totalTaskCountToday() -> Int {
+        todayTasks().count
+    }
+
+    func scheduleAllReminders() {
+        saveReminderTimes()
 
         NotificationManager.shared.checkPermissionStatus { status in
             DispatchQueue.main.async {
                 switch status {
                 case .notDetermined:
                     NotificationManager.shared.requestPermission { granted in
-                        if granted {
-                            let components = Calendar.current.dateComponents([.hour, .minute], from: self.dailyPromptTime)
-                            let hour = components.hour ?? 20
-                            let minute = components.minute ?? 0
-                            NotificationManager.shared.scheduleDailyReminder(hour: hour, minute: minute)
-
-                            self.alertMessage = "Reminder scheduled successfully."
-                            self.showAlert = true
-                        } else {
-                            self.alertMessage = "Notification permission was not granted."
-                            self.showAlert = true
+                        DispatchQueue.main.async {
+                            if granted {
+                                self.scheduleNotificationsAfterPermission()
+                            } else {
+                                self.alertMessage = "Notification permission was not granted."
+                                self.showAlert = true
+                            }
                         }
                     }
 
                 case .authorized, .provisional, .ephemeral:
-                    let components = Calendar.current.dateComponents([.hour, .minute], from: self.dailyPromptTime)
-                    let hour = components.hour ?? 20
-                    let minute = components.minute ?? 0
-                    NotificationManager.shared.scheduleDailyReminder(hour: hour, minute: minute)
-
-                    self.alertMessage = "Reminder scheduled successfully."
-                    self.showAlert = true
+                    self.scheduleNotificationsAfterPermission()
 
                 case .denied:
                     self.alertMessage = "Notifications are disabled. Please enable them in Settings."
@@ -149,15 +263,62 @@ final class HomeViewModel: ObservableObject {
         }
     }
 
-    func totalEntries() -> Int {
-        entries.count
+    private func scheduleNotificationsAfterPermission() {
+        let morning = Calendar.current.dateComponents([.hour, .minute], from: morningReminderTime)
+        let planning = Calendar.current.dateComponents([.hour, .minute], from: nightPlanningTime)
+        let nightly = Calendar.current.dateComponents([.hour, .minute], from: nightCheckInTime)
+        let friday = Calendar.current.dateComponents([.hour, .minute], from: fridayReminderTime)
+
+        NotificationManager.shared.scheduleNightPlanningReminder(
+            hour: planning.hour ?? 21,
+            minute: planning.minute ?? 0
+        )
+
+        NotificationManager.shared.scheduleNightCheckInReminder(
+            hour: nightly.hour ?? 21,
+            minute: nightly.minute ?? 30
+        )
+
+        NotificationManager.shared.scheduleFridayReminder(
+            hour: friday.hour ?? 18,
+            minute: friday.minute ?? 0
+        )
+
+        scheduleTomorrowMorningReminder(
+            hour: morning.hour ?? 7,
+            minute: morning.minute ?? 0
+        )
+
+        alertMessage = "Your reminders were scheduled."
+        showAlert = true
     }
-    
+
+    func scheduleTomorrowMorningReminder(hour: Int? = nil, minute: Int? = nil) {
+        let components = Calendar.current.dateComponents([.hour, .minute], from: morningReminderTime)
+        let finalHour = hour ?? components.hour ?? 7
+        let finalMinute = minute ?? components.minute ?? 0
+
+        let tasks = tomorrowTasks().map(\.title)
+        let verse = todayVerse.reference
+
+        NotificationManager.shared.scheduleTomorrowMorningReminder(
+            hour: finalHour,
+            minute: finalMinute,
+            tasks: tasks,
+            verseReference: verse
+        )
+    }
+
+    func prepareTomorrowDraftFromExistingPlan() {
+        let existingPlan = tomorrowPlan()
+        tomorrowNotes = existingPlan.notes
+    }
+
     func deleteEntries(at offsets: IndexSet) {
         entries.remove(atOffsets: offsets)
         store.save(entries: entries)
     }
-    
+
     func updateEntry(updatedEntry: ReflectionEntry) {
         if let index = entries.firstIndex(where: { $0.id == updatedEntry.id }) {
             entries[index] = updatedEntry
@@ -165,12 +326,12 @@ final class HomeViewModel: ObservableObject {
             store.save(entries: entries)
         }
     }
-    
+
     func completeOnboarding() {
         hasCompletedOnboarding = true
         UserDefaults.standard.set(true, forKey: "has_completed_onboarding")
     }
-    
+
     func savePrompts() {
         let trimmedOne = promptOne.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedTwo = promptTwo.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -189,17 +350,61 @@ final class HomeViewModel: ObservableObject {
         promptOne = "What did you learn today?"
         promptTwo = "What did you avoid today?"
         promptThree = "What’s one small win?"
-
         savePrompts()
     }
-    
-    func loadReminderTime() {
-        if let savedDate = UserDefaults.standard.object(forKey: reminderTimeKey) as? Date {
-            dailyPromptTime = savedDate
+
+    private func upsertPlan(_ plan: DayPlan) {
+        if let index = plans.firstIndex(where: { $0.id == plan.id }) {
+            plans[index] = plan
+        } else if let sameDayIndex = plans.firstIndex(where: { Calendar.current.isDate($0.date, inSameDayAs: plan.date) }) {
+            plans[sameDayIndex] = plan
+        } else {
+            plans.append(plan)
+        }
+
+        plans.sort(by: { $0.date > $1.date })
+        savePlans()
+    }
+
+    private func savePlans() {
+        planStore.save(plans: plans)
+    }
+
+    private func loadReminderTimes() {
+        if let saved = UserDefaults.standard.object(forKey: dailyReminderTimeKey) as? Date {
+            dailyPromptTime = saved
+        }
+        if let saved = UserDefaults.standard.object(forKey: morningReminderTimeKey) as? Date {
+            morningReminderTime = saved
+        }
+        if let saved = UserDefaults.standard.object(forKey: nightPlanningTimeKey) as? Date {
+            nightPlanningTime = saved
+        }
+        if let saved = UserDefaults.standard.object(forKey: nightCheckInTimeKey) as? Date {
+            nightCheckInTime = saved
+        }
+        if let saved = UserDefaults.standard.object(forKey: fridayReminderTimeKey) as? Date {
+            fridayReminderTime = saved
         }
     }
 
-    func saveReminderTime() {
-        UserDefaults.standard.set(dailyPromptTime, forKey: reminderTimeKey)
+    private func saveReminderTimes() {
+        UserDefaults.standard.set(dailyPromptTime, forKey: dailyReminderTimeKey)
+        UserDefaults.standard.set(morningReminderTime, forKey: morningReminderTimeKey)
+        UserDefaults.standard.set(nightPlanningTime, forKey: nightPlanningTimeKey)
+        UserDefaults.standard.set(nightCheckInTime, forKey: nightCheckInTimeKey)
+        UserDefaults.standard.set(fridayReminderTime, forKey: fridayReminderTimeKey)
+    }
+    
+    func deleteTodayTask(_ task: DailyTask) {
+        var plan = todayPlan()
+        plan.tasks.removeAll { $0.id == task.id }
+        upsertPlan(plan)
+    }
+
+    func deleteTomorrowTask(_ task: DailyTask) {
+        var plan = tomorrowPlan()
+        plan.tasks.removeAll { $0.id == task.id }
+        upsertPlan(plan)
     }
 }

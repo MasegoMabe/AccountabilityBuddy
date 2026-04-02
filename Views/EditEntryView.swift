@@ -27,28 +27,38 @@ struct EditEntryView: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 20) {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Edit Check-In")
-                        .font(.largeTitle.bold())
+        ZStack {
+            AppTheme.background
+                .ignoresSafeArea()
 
-                    Text(entry.date.formatted(date: .complete, time: .omitted))
-                        .foregroundStyle(.secondary)
+            ScrollView {
+                VStack(spacing: 20) {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Edit Check-In")
+                            .font(.largeTitle.bold())
+                            .foregroundStyle(AppTheme.textPrimary)
+
+                        Text(entry.date.formatted(date: .complete, time: .omitted))
+                            .foregroundStyle(AppTheme.textSecondary)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                    promptCard(title: viewModel.promptOne, text: $learnedToday)
+                    promptCard(title: viewModel.promptTwo, text: $avoidedToday)
+                    promptCard(title: viewModel.promptThree, text: $smallWin)
+
+                    Button("Save Changes") {
+                        saveChanges()
+                    }
+                    .fontWeight(.semibold)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
+                    .background(AppTheme.plum)
+                    .foregroundStyle(.white)
+                    .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-
-                promptCard(title: viewModel.promptOne, text: $learnedToday)
-                promptCard(title: viewModel.promptTwo, text: $avoidedToday)
-                promptCard(title: viewModel.promptThree, text: $smallWin)
-
-                Button("Save Changes") {
-                    saveChanges()
-                }
-                .buttonStyle(.borderedProminent)
-                .frame(maxWidth: .infinity)
+                .padding()
             }
-            .padding()
         }
         .navigationTitle("Edit Entry")
         .navigationBarTitleDisplayMode(.inline)
@@ -90,19 +100,18 @@ struct EditEntryView: View {
         VStack(alignment: .leading, spacing: 8) {
             Text(title)
                 .font(.headline)
+                .foregroundStyle(AppTheme.textPrimary)
 
             TextEditor(text: text)
                 .frame(minHeight: 120)
                 .padding(8)
-                .background(Color(.systemBackground))
+                .background(Color.white)
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.gray.opacity(0.25), lineWidth: 1)
+                        .stroke(AppTheme.softPink, lineWidth: 1)
                 )
                 .clipShape(RoundedRectangle(cornerRadius: 12))
         }
-        .padding()
-        .background(Color(.secondarySystemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .softCard()
     }
 }

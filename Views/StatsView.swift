@@ -12,30 +12,56 @@ struct StatsView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 20) {
-                statCard(title: "Current Streak", value: "\(viewModel.currentStreak()) days")
-                statCard(title: "Total Check-Ins", value: "\(viewModel.totalEntries())")
-                statCard(title: "Today’s Status", value: viewModel.hasEntryForToday() ? "Completed" : "Not completed")
+            ZStack {
+                AppTheme.background
+                    .ignoresSafeArea()
 
-                Spacer()
+                VStack(spacing: 18) {
+                    Text("Your progress 💖")
+                        .font(.system(size: 28, weight: .bold, design: .rounded))
+                        .foregroundStyle(AppTheme.textPrimary)
+                        .padding(.top, 8)
+
+                    statCard(title: "Current Streak", value: "\(viewModel.currentStreak()) days", icon: "flame.fill")
+                    statCard(title: "Total Check-Ins", value: "\(viewModel.totalEntries())", icon: "heart.circle.fill")
+                    statCard(
+                        title: "Today’s Status",
+                        value: viewModel.hasEntryForToday() ? "Completed" : "Not completed",
+                        icon: "checkmark.seal.fill"
+                    )
+
+                    Spacer()
+                }
+                .padding()
             }
-            .padding()
             .navigationTitle("Progress")
         }
     }
 
     @ViewBuilder
-    private func statCard(title: String, value: String) -> some View {
-        VStack(spacing: 8) {
-            Text(title)
-                .font(.headline)
+    private func statCard(title: String, value: String, icon: String) -> some View {
+        HStack(spacing: 16) {
+            ZStack {
+                Circle()
+                    .fill(AppTheme.lavender)
+                    .frame(width: 56, height: 56)
 
-            Text(value)
-                .font(.title.bold())
+                Image(systemName: icon)
+                    .foregroundStyle(AppTheme.deepPlum)
+            }
+
+            VStack(alignment: .leading, spacing: 6) {
+                Text(title)
+                    .font(.headline)
+                    .foregroundStyle(AppTheme.textPrimary)
+
+                Text(value)
+                    .font(.title3.bold())
+                    .foregroundStyle(AppTheme.textSecondary)
+            }
+
+            Spacer()
         }
-        .frame(maxWidth: .infinity)
-        .padding()
-        .background(Color(.secondarySystemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 18))
+        .softCard()
     }
 }
