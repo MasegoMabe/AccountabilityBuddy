@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B8B04EA92F7EF8C300DD2012 /* AcademicReminder.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8B04EA82F7EF8C300DD2012 /* AcademicReminder.swift */; };
+		B8B04EAB2F7EF8E700DD2012 /* ReminderStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8B04EAA2F7EF8E700DD2012 /* ReminderStore.swift */; };
 		B8B4393A2F7DA11600FD917D /* AccountabilityBuddyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8B439392F7DA11600FD917D /* AccountabilityBuddyApp.swift */; };
 		B8B4393C2F7DA11600FD917D /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8B4393B2F7DA11600FD917D /* HomeView.swift */; };
 		B8B4393E2F7DA11900FD917D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B8B4393D2F7DA11900FD917D /* Assets.xcassets */; };
@@ -50,6 +52,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		B8B04EA82F7EF8C300DD2012 /* AcademicReminder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AcademicReminder.swift; sourceTree = "<group>"; };
+		B8B04EAA2F7EF8E700DD2012 /* ReminderStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderStore.swift; sourceTree = "<group>"; };
 		B8B439362F7DA11500FD917D /* AccountabilityBuddy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AccountabilityBuddy.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B8B439392F7DA11600FD917D /* AccountabilityBuddyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountabilityBuddyApp.swift; sourceTree = "<group>"; };
 		B8B4393B2F7DA11600FD917D /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
@@ -181,6 +185,8 @@
 				B8B4396B2F7DA23500FD917D /* NotificationManager.swift */,
 				B8B439812F7DBBC200FD917D /* BibleVerseProvider.swift */,
 				B8B439832F7DBBDC00FD917D /* PlanStore.swift */,
+				B8B04EA82F7EF8C300DD2012 /* AcademicReminder.swift */,
+				B8B04EAA2F7EF8E700DD2012 /* ReminderStore.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -351,8 +357,10 @@
 				B8B439762F7DA99E00FD917D /* EditEntryView.swift in Sources */,
 				B8B4393C2F7DA11600FD917D /* HomeView.swift in Sources */,
 				B8B4396E2F7DA25500FD917D /* HomeViewModel.swift in Sources */,
+				B8B04EA92F7EF8C300DD2012 /* AcademicReminder.swift in Sources */,
 				B8B439802F7DBBA700FD917D /* BibleVerse.swift in Sources */,
 				B8B4397E2F7DBB9600FD917D /* DailyPlan.swift in Sources */,
+				B8B04EAB2F7EF8E700DD2012 /* ReminderStore.swift in Sources */,
 				B8B439682F7DA1E800FD917D /* ReflectionEntry.swift in Sources */,
 				B8B439872F7DC34400FD917D /* Theme.swift in Sources */,
 				B8B439722F7DA2A700FD917D /* StatsView.swift in Sources */,

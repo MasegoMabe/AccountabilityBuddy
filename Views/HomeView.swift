@@ -11,8 +11,8 @@ struct HomeView: View {
     @EnvironmentObject var viewModel: HomeViewModel
 
     @State private var showTodayTasks = true
-    @State private var showTomorrowPlan = false
-    @State private var showNightCheckIn = false
+    @State private var showTomorrowTasks = true
+    @State private var showNightReflection = false
     @State private var showWhyItMatters = false
 
     var body: some View {
@@ -25,26 +25,27 @@ struct HomeView: View {
                     VStack(spacing: 18) {
                         headerSection
                         verseCard
+
                         collapsibleSection(
-                            title: "Today’s to-do list",
-                            systemImage: "sparkles",
+                            title: "Today’s to-do",
+                            systemImage: "checklist",
                             isExpanded: $showTodayTasks
                         ) {
                             todayTodoContent
                         }
 
                         collapsibleSection(
-                            title: "Plan tomorrow tonight",
-                            systemImage: "moon.stars.fill",
-                            isExpanded: $showTomorrowPlan
+                            title: "Tomorrow’s to-do",
+                            systemImage: "calendar.badge.plus",
+                            isExpanded: $showTomorrowTasks
                         ) {
-                            tomorrowPlanningContent
+                            tomorrowTodoContent
                         }
 
                         collapsibleSection(
-                            title: "Night check-in",
-                            systemImage: "heart.text.square.fill",
-                            isExpanded: $showNightCheckIn
+                            title: "Night reflection",
+                            systemImage: "moon.stars.fill",
+                            isExpanded: $showNightReflection
                         ) {
                             reflectionContent
                         }
@@ -82,16 +83,15 @@ struct HomeView: View {
                 .font(.system(size: 30, weight: .bold, design: .rounded))
                 .foregroundStyle(AppTheme.textPrimary)
                 .multilineTextAlignment(.center)
-            
-            Text("your Accountability Buddy here, ")
-                .font(.system(size: 18, weight: .semibold, design: .rounded))
-                .foregroundStyle(AppTheme.deepPlum.opacity(0.9))
 
             Text("Let’s have a beautiful, disciplined day 💕")
                 .font(.subheadline.weight(.medium))
                 .foregroundStyle(AppTheme.textSecondary)
                 .multilineTextAlignment(.center)
 
+            Text("Accountability Buddy")
+                .font(.system(size: 18, weight: .semibold, design: .rounded))
+                .foregroundStyle(AppTheme.deepPlum.opacity(0.9))
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 8)
@@ -196,7 +196,7 @@ struct HomeView: View {
         }
     }
 
-    private var tomorrowPlanningContent: some View {
+    private var tomorrowTodoContent: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack(spacing: 10) {
                 TextField("Add a task for tomorrow", text: $viewModel.tomorrowTaskInput)
@@ -228,13 +228,23 @@ struct HomeView: View {
                 VStack(spacing: 10) {
                     ForEach(viewModel.tomorrowTasks()) { task in
                         HStack(spacing: 12) {
-                            Image(systemName: "moon.stars")
-                                .foregroundStyle(AppTheme.plum)
+                            Button {
+                                viewModel.toggleTomorrowTask(task)
+                            } label: {
+                                HStack(spacing: 12) {
+                                    Image(systemName: task.isCompleted ? "checkmark.circle.fill" : "circle")
+                                        .font(.title3)
+                                        .foregroundStyle(task.isCompleted ? AppTheme.success : AppTheme.plum)
 
-                            Text(task.title)
-                                .foregroundStyle(AppTheme.textPrimary)
+                                    Text(task.title)
+                                        .font(.body)
+                                        .strikethrough(task.isCompleted)
+                                        .foregroundStyle(AppTheme.textPrimary)
 
-                            Spacer()
+                                    Spacer()
+                                }
+                            }
+                            .buttonStyle(.plain)
 
                             Button(role: .destructive) {
                                 viewModel.deleteTomorrowTask(task)
@@ -266,10 +276,10 @@ struct HomeView: View {
                             .stroke(AppTheme.softPink, lineWidth: 1)
                     )
 
-                Button("Save Tomorrow Plan") {
+                Button("Save Tomorrow’s Plan") {
                     viewModel.saveTomorrowNotes()
                     viewModel.scheduleTomorrowMorningReminder()
-                    viewModel.alertMessage = "Tomorrow’s plan saved."
+                    viewModel.alertMessage = "Tomorrow’s to-do saved."
                     viewModel.showAlert = true
                 }
                 .fontWeight(.semibold)
@@ -284,14 +294,15 @@ struct HomeView: View {
 
     private var reflectionContent: some View {
         VStack(alignment: .leading, spacing: 14) {
-            promptCard(title: viewModel.promptOne, text: $viewModel.learnedToday)
-            promptCard(title: viewModel.promptTwo, text: $viewModel.avoidedToday)
-            promptCard(title: viewModel.promptThree, text: $viewModel.smallWin)
+            promptCard(title: "School", text: $viewModel.schoolReflection)
+            promptCard(title: "Work", text: $viewModel.workReflection)
+            promptCard(title: "Personal", text: $viewModel.personalReflection)
+            promptCard(title: "Project Lab", text: $viewModel.projectLabReflection)
 
             Button {
                 viewModel.saveTodayEntry()
             } label: {
-                Text(viewModel.hasEntryForToday() ? "Today already completed" : "Save Today’s Check-In")
+                Text(viewModel.hasEntryForToday() ? "Tonight’s reflection already saved" : "Save Night Reflection")
                     .fontWeight(.semibold)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)
@@ -305,7 +316,7 @@ struct HomeView: View {
 
     private var whyItMattersContent: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("This is not about doing everything. It’s about collecting proof that you showed up.")
+            Text("Each night you reset. Each morning you begin with a plan. Small consistent days turn into a strong life.")
                 .foregroundStyle(AppTheme.textSecondary)
         }
     }

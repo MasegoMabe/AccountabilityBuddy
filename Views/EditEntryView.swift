@@ -13,17 +13,19 @@ struct EditEntryView: View {
 
     let entry: ReflectionEntry
 
-    @State private var learnedToday: String
-    @State private var avoidedToday: String
-    @State private var smallWin: String
+    @State private var schoolReflection: String
+    @State private var workReflection: String
+    @State private var personalReflection: String
+    @State private var projectLabReflection: String
     @State private var showAlert = false
     @State private var alertMessage = ""
 
     init(entry: ReflectionEntry) {
         self.entry = entry
-        _learnedToday = State(initialValue: entry.learnedToday)
-        _avoidedToday = State(initialValue: entry.avoidedToday)
-        _smallWin = State(initialValue: entry.smallWin)
+        _schoolReflection = State(initialValue: entry.schoolReflection)
+        _workReflection = State(initialValue: entry.workReflection)
+        _personalReflection = State(initialValue: entry.personalReflection)
+        _projectLabReflection = State(initialValue: entry.projectLabReflection)
     }
 
     var body: some View {
@@ -34,7 +36,7 @@ struct EditEntryView: View {
             ScrollView {
                 VStack(spacing: 20) {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Edit Check-In")
+                        Text("Edit Reflection")
                             .font(.largeTitle.bold())
                             .foregroundStyle(AppTheme.textPrimary)
 
@@ -43,9 +45,10 @@ struct EditEntryView: View {
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
 
-                    promptCard(title: viewModel.promptOne, text: $learnedToday)
-                    promptCard(title: viewModel.promptTwo, text: $avoidedToday)
-                    promptCard(title: viewModel.promptThree, text: $smallWin)
+                    promptCard(title: "School", text: $schoolReflection)
+                    promptCard(title: "Work", text: $workReflection)
+                    promptCard(title: "Personal", text: $personalReflection)
+                    promptCard(title: "Project Lab", text: $projectLabReflection)
 
                     Button("Save Changes") {
                         saveChanges()
@@ -70,14 +73,13 @@ struct EditEntryView: View {
     }
 
     private func saveChanges() {
-        let trimmedLearned = learnedToday.trimmingCharacters(in: .whitespacesAndNewlines)
-        let trimmedAvoided = avoidedToday.trimmingCharacters(in: .whitespacesAndNewlines)
-        let trimmedSmallWin = smallWin.trimmingCharacters(in: .whitespacesAndNewlines)
+        let school = schoolReflection.trimmingCharacters(in: .whitespacesAndNewlines)
+        let work = workReflection.trimmingCharacters(in: .whitespacesAndNewlines)
+        let personal = personalReflection.trimmingCharacters(in: .whitespacesAndNewlines)
+        let projectLab = projectLabReflection.trimmingCharacters(in: .whitespacesAndNewlines)
 
-        guard !trimmedLearned.isEmpty,
-              !trimmedAvoided.isEmpty,
-              !trimmedSmallWin.isEmpty else {
-            alertMessage = "Please fill in all 3 prompts before saving."
+        guard !school.isEmpty, !work.isEmpty, !personal.isEmpty, !projectLab.isEmpty else {
+            alertMessage = "Please fill in all 4 reflection sections before saving."
             showAlert = true
             return
         }
@@ -85,10 +87,10 @@ struct EditEntryView: View {
         let updatedEntry = ReflectionEntry(
             id: entry.id,
             date: entry.date,
-            learnedToday: trimmedLearned,
-            avoidedToday: trimmedAvoided,
-            smallWin: trimmedSmallWin,
-            aiReflection: entry.aiReflection
+            schoolReflection: school,
+            workReflection: work,
+            personalReflection: personal,
+            projectLabReflection: projectLab
         )
 
         viewModel.updateEntry(updatedEntry: updatedEntry)

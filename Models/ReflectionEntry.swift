@@ -10,24 +10,24 @@ import Foundation
 struct ReflectionEntry: Identifiable, Codable, Equatable {
     let id: UUID
     let date: Date
-    let learnedToday: String
-    let avoidedToday: String
-    let smallWin: String
-    let aiReflection: String?
+    let schoolReflection: String
+    let workReflection: String
+    let personalReflection: String
+    let projectLabReflection: String
 
     init(
         id: UUID = UUID(),
         date: Date = Date(),
-        learnedToday: String,
-        avoidedToday: String,
-        smallWin: String,
-        aiReflection: String? = nil
+        schoolReflection: String,
+        workReflection: String,
+        personalReflection: String,
+        projectLabReflection: String
     ) {
         self.id = id
         self.date = date
-        self.learnedToday = learnedToday
-        self.avoidedToday = avoidedToday
-        self.smallWin = smallWin
-        self.aiReflection = aiReflection
+        self.schoolReflection = schoolReflection
+        self.workReflection = workReflection
+        self.personalReflection = personalReflection
+        self.projectLabReflection = projectLabReflection
     }
 }

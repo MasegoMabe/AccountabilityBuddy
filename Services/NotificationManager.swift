@@ -73,7 +73,7 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
 
         let content = UNMutableNotificationContent()
         content.title = "Plan tomorrow"
-        content.body = "Write tomorrow’s tasks tonight so morning-you is not confused."
+        content.body = "Write tomorrow’s to-do list tonight so tomorrow feels lighter."
         content.sound = .default
 
         let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: true)
@@ -96,8 +96,8 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
         components.minute = minute
 
         let content = UNMutableNotificationContent()
-        content.title = "Night check-in"
-        content.body = "How did today go? Do your reflection before you sleep."
+        content.title = "Night reflection"
+        content.body = "Reflect on school, work, personal life, and project lab before you sleep."
         content.sound = .default
 
         let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: true)
@@ -136,45 +136,60 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
         center.add(request)
     }
 
-    func scheduleTestReminder() {
-        checkPermissionStatus { status in
-            switch status {
-            case .notDetermined:
-                self.requestPermission { granted in
-                    if granted {
-                        self.scheduleTestNotificationNow()
-                    }
-                }
+    func scheduleAcademicReminder(_ reminder: AcademicReminder) {
+        removeAcademicReminderNotifications(for: reminder.id)
 
-            case .authorized, .provisional, .ephemeral:
-                self.scheduleTestNotificationNow()
+        scheduleSingleAcademicNotification(
+            id: "\(reminder.id.uuidString)_weekBefore",
+            title: "\(reminder.type.rawValue) reminder",
+            body: "\(reminder.title) is in 1 week.",
+            targetDate: Calendar.current.date(byAdding: .day, value: -7, to: reminder.date)
+        )
 
-            case .denied:
-                print("Notifications are denied. Enable them in Settings.")
+        scheduleSingleAcademicNotification(
+            id: "\(reminder.id.uuidString)_dayBefore",
+            title: "\(reminder.type.rawValue) reminder",
+            body: "\(reminder.title) is tomorrow.",
+            targetDate: Calendar.current.date(byAdding: .day, value: -1, to: reminder.date)
+        )
 
-            @unknown default:
-                print("Unknown notification status.")
-            }
+        if reminder.includesOptionalReminder, let optionalOffset = reminder.optionalOffset {
+            let customDate = Calendar.current.date(byAdding: optionalOffset.dateComponents, to: reminder.date)
+
+            scheduleSingleAcademicNotification(
+                id: "\(reminder.id.uuidString)_optional",
+                title: "\(reminder.type.rawValue) reminder",
+                body: "\(reminder.title) is coming up soon.",
+                targetDate: customDate
+            )
         }
     }
 
-    private func scheduleTestNotificationNow() {
+    func removeAcademicReminderNotifications(for reminderID: UUID) {
         let center = UNUserNotificationCenter.current()
-        center.removePendingNotificationRequests(withIdentifiers: ["test_accountability_reminder"])
+        let identifiers = [
+            "\(reminderID.uuidString)_weekBefore",
+            "\(reminderID.uuidString)_dayBefore",
+            "\(reminderID.uuidString)_optional"
+        ]
+        center.removePendingNotificationRequests(withIdentifiers: identifiers)
+    }
+
+    private func scheduleSingleAcademicNotification(id: String, title: String, body: String, targetDate: Date?) {
+        guard let targetDate else { return }
+        guard targetDate > Date() else { return }
+
+        let center = UNUserNotificationCenter.current()
 
         let content = UNMutableNotificationContent()
-        content.title = "Accountability Buddy Test"
-        content.body = "This is a test notification."
+        content.title = title
+        content.body = body
         content.sound = .default
 
-        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 5, repeats: false)
+        let components = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: targetDate)
+        let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
 
-        let request = UNNotificationRequest(
-            identifier: "test_accountability_reminder",
-            content: content,
-            trigger: trigger
-        )
-
+        let request = UNNotificationRequest(identifier: id, content: content, trigger: trigger)
         center.add(request)
     }
 

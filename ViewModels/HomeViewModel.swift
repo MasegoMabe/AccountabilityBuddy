@@ -9,38 +9,42 @@ import Foundation
 
 @MainActor
 final class HomeViewModel: ObservableObject {
-    @Published var learnedToday = ""
-    @Published var avoidedToday = ""
-    @Published var smallWin = ""
+    @Published var schoolReflection = ""
+    @Published var workReflection = ""
+    @Published var personalReflection = ""
+    @Published var projectLabReflection = ""
 
     @Published var entries: [ReflectionEntry] = []
     @Published var plans: [DayPlan] = []
+    @Published var academicReminders: [AcademicReminder] = []
 
     @Published var todayTaskInput = ""
     @Published var tomorrowTaskInput = ""
     @Published var tomorrowNotes = ""
 
-    @Published var dailyPromptTime: Date = Calendar.current.date(bySettingHour: 20, minute: 0, second: 0, of: Date()) ?? Date()
     @Published var morningReminderTime: Date = Calendar.current.date(bySettingHour: 7, minute: 0, second: 0, of: Date()) ?? Date()
     @Published var nightPlanningTime: Date = Calendar.current.date(bySettingHour: 21, minute: 0, second: 0, of: Date()) ?? Date()
     @Published var nightCheckInTime: Date = Calendar.current.date(bySettingHour: 21, minute: 30, second: 0, of: Date()) ?? Date()
     @Published var fridayReminderTime: Date = Calendar.current.date(bySettingHour: 18, minute: 0, second: 0, of: Date()) ?? Date()
+
+    @Published var reminderTitleInput = ""
+    @Published var reminderDateInput = Calendar.current.date(byAdding: .day, value: 7, to: Date()) ?? Date()
+    @Published var reminderTypeInput: ReminderType = .exam
+    @Published var includesOptionalReminder = false
+    @Published var optionalReminderOffset: ReminderOffset = .twoDaysBefore
+    @Published var editingReminderID: UUID?
 
     @Published var showAlert = false
     @Published var alertMessage = ""
     @Published var aiReflectionEnabled = false
     @Published var hasCompletedOnboarding = UserDefaults.standard.bool(forKey: "has_completed_onboarding")
 
-    @Published var promptOne = UserDefaults.standard.string(forKey: "prompt_one") ?? "What did you learn today?"
-    @Published var promptTwo = UserDefaults.standard.string(forKey: "prompt_two") ?? "What did you avoid today?"
-    @Published var promptThree = UserDefaults.standard.string(forKey: "prompt_three") ?? "What’s one small win?"
-
     @Published var todayVerse: BibleVerse = BibleVerseProvider.verseForToday()
 
     private let store = EntryStore()
     private let planStore = PlanStore()
+    private let reminderStore = ReminderStore()
 
-    private let dailyReminderTimeKey = "daily_prompt_time"
     private let morningReminderTimeKey = "morning_reminder_time"
     private let nightPlanningTimeKey = "night_planning_time"
     private let nightCheckInTimeKey = "night_checkin_time"
@@ -49,6 +53,7 @@ final class HomeViewModel: ObservableObject {
     init() {
         loadEntries()
         loadPlans()
+        loadAcademicReminders()
         loadReminderTimes()
         refreshVerse()
         prepareTomorrowDraftFromExistingPlan()
@@ -66,36 +71,44 @@ final class HomeViewModel: ObservableObject {
         plans = planStore.load().sorted(by: { $0.date > $1.date })
     }
 
+    func loadAcademicReminders() {
+        academicReminders = reminderStore.load().sorted(by: { $0.date < $1.date })
+    }
+
     func saveTodayEntry() {
-        guard !learnedToday.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
-              !avoidedToday.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
-              !smallWin.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            alertMessage = "Please answer all 3 prompts before saving."
+        let school = schoolReflection.trimmingCharacters(in: .whitespacesAndNewlines)
+        let work = workReflection.trimmingCharacters(in: .whitespacesAndNewlines)
+        let personal = personalReflection.trimmingCharacters(in: .whitespacesAndNewlines)
+        let projectLab = projectLabReflection.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard !school.isEmpty, !work.isEmpty, !personal.isEmpty, !projectLab.isEmpty else {
+            alertMessage = "Please fill in school, work, personal, and project lab before saving."
             showAlert = true
             return
         }
 
         if hasEntryForToday() {
-            alertMessage = "You’ve already completed today’s check-in."
+            alertMessage = "You’ve already completed tonight’s reflection."
             showAlert = true
             return
         }
 
         let entry = ReflectionEntry(
-            learnedToday: learnedToday,
-            avoidedToday: avoidedToday,
-            smallWin: smallWin,
-            aiReflection: nil
+            schoolReflection: school,
+            workReflection: work,
+            personalReflection: personal,
+            projectLabReflection: projectLab
         )
 
         entries.insert(entry, at: 0)
         store.save(entries: entries)
 
-        learnedToday = ""
-        avoidedToday = ""
-        smallWin = ""
+        schoolReflection = ""
+        workReflection = ""
+        personalReflection = ""
+        projectLabReflection = ""
 
-        alertMessage = "Today’s check-in saved."
+        alertMessage = "Tonight’s reflection saved."
         showAlert = true
     }
 
@@ -155,7 +168,9 @@ final class HomeViewModel: ObservableObject {
     }
 
     func tomorrowPlan() -> DayPlan {
-        let tomorrow = Calendar.current.startOfDay(for: Calendar.current.date(byAdding: .day, value: 1, to: Date()) ?? Date())
+        let tomorrowDate = Calendar.current.date(byAdding: .day, value: 1, to: Date()) ?? Date()
+        let tomorrow = Calendar.current.startOfDay(for: tomorrowDate)
+
         if let existing = plans.first(where: { Calendar.current.isDate($0.date, inSameDayAs: tomorrow) }) {
             return existing
         }
@@ -204,15 +219,10 @@ final class HomeViewModel: ObservableObject {
         upsertPlan(plan)
     }
 
-    func deleteTodayTasks(at offsets: IndexSet) {
-        var plan = todayPlan()
-        plan.tasks.remove(atOffsets: offsets)
-        upsertPlan(plan)
-    }
-
-    func deleteTomorrowTasks(at offsets: IndexSet) {
+    func toggleTomorrowTask(_ task: DailyTask) {
         var plan = tomorrowPlan()
-        plan.tasks.remove(atOffsets: offsets)
+        guard let index = plan.tasks.firstIndex(where: { $0.id == task.id }) else { return }
+        plan.tasks[index].isCompleted.toggle()
         upsertPlan(plan)
     }
 
@@ -289,6 +299,10 @@ final class HomeViewModel: ObservableObject {
             minute: morning.minute ?? 0
         )
 
+        for reminder in academicReminders {
+            NotificationManager.shared.scheduleAcademicReminder(reminder)
+        }
+
         alertMessage = "Your reminders were scheduled."
         showAlert = true
     }
@@ -332,27 +346,6 @@ final class HomeViewModel: ObservableObject {
         UserDefaults.standard.set(true, forKey: "has_completed_onboarding")
     }
 
-    func savePrompts() {
-        let trimmedOne = promptOne.trimmingCharacters(in: .whitespacesAndNewlines)
-        let trimmedTwo = promptTwo.trimmingCharacters(in: .whitespacesAndNewlines)
-        let trimmedThree = promptThree.trimmingCharacters(in: .whitespacesAndNewlines)
-
-        promptOne = trimmedOne.isEmpty ? "What did you learn today?" : trimmedOne
-        promptTwo = trimmedTwo.isEmpty ? "What did you avoid today?" : trimmedTwo
-        promptThree = trimmedThree.isEmpty ? "What’s one small win?" : trimmedThree
-
-        UserDefaults.standard.set(promptOne, forKey: "prompt_one")
-        UserDefaults.standard.set(promptTwo, forKey: "prompt_two")
-        UserDefaults.standard.set(promptThree, forKey: "prompt_three")
-    }
-
-    func resetPromptsToDefault() {
-        promptOne = "What did you learn today?"
-        promptTwo = "What did you avoid today?"
-        promptThree = "What’s one small win?"
-        savePrompts()
-    }
-
     private func upsertPlan(_ plan: DayPlan) {
         if let index = plans.firstIndex(where: { $0.id == plan.id }) {
             plans[index] = plan
@@ -370,10 +363,14 @@ final class HomeViewModel: ObservableObject {
         planStore.save(plans: plans)
     }
 
+    private func saveReminderTimes() {
+        UserDefaults.standard.set(morningReminderTime, forKey: morningReminderTimeKey)
+        UserDefaults.standard.set(nightPlanningTime, forKey: nightPlanningTimeKey)
+        UserDefaults.standard.set(nightCheckInTime, forKey: nightCheckInTimeKey)
+        UserDefaults.standard.set(fridayReminderTime, forKey: fridayReminderTimeKey)
+    }
+
     private func loadReminderTimes() {
-        if let saved = UserDefaults.standard.object(forKey: dailyReminderTimeKey) as? Date {
-            dailyPromptTime = saved
-        }
         if let saved = UserDefaults.standard.object(forKey: morningReminderTimeKey) as? Date {
             morningReminderTime = saved
         }
@@ -388,14 +385,6 @@ final class HomeViewModel: ObservableObject {
         }
     }
 
-    private func saveReminderTimes() {
-        UserDefaults.standard.set(dailyPromptTime, forKey: dailyReminderTimeKey)
-        UserDefaults.standard.set(morningReminderTime, forKey: morningReminderTimeKey)
-        UserDefaults.standard.set(nightPlanningTime, forKey: nightPlanningTimeKey)
-        UserDefaults.standard.set(nightCheckInTime, forKey: nightCheckInTimeKey)
-        UserDefaults.standard.set(fridayReminderTime, forKey: fridayReminderTimeKey)
-    }
-    
     func deleteTodayTask(_ task: DailyTask) {
         var plan = todayPlan()
         plan.tasks.removeAll { $0.id == task.id }
@@ -406,5 +395,66 @@ final class HomeViewModel: ObservableObject {
         var plan = tomorrowPlan()
         plan.tasks.removeAll { $0.id == task.id }
         upsertPlan(plan)
+    }
+
+    func saveAcademicReminder() {
+        let trimmedTitle = reminderTitleInput.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard !trimmedTitle.isEmpty else {
+            alertMessage = "Please enter a reminder title."
+            showAlert = true
+            return
+        }
+
+        let reminder = AcademicReminder(
+            id: editingReminderID ?? UUID(),
+            title: trimmedTitle,
+            date: reminderDateInput,
+            type: reminderTypeInput,
+            includesOptionalReminder: includesOptionalReminder,
+            optionalOffset: includesOptionalReminder ? optionalReminderOffset : nil
+        )
+
+        if let existingIndex = academicReminders.firstIndex(where: { $0.id == reminder.id }) {
+            academicReminders[existingIndex] = reminder
+        } else {
+            academicReminders.append(reminder)
+        }
+
+        academicReminders.sort(by: { $0.date < $1.date })
+        reminderStore.save(reminders: academicReminders)
+        NotificationManager.shared.scheduleAcademicReminder(reminder)
+        clearReminderForm()
+
+        alertMessage = "Reminder saved."
+        showAlert = true
+    }
+
+    func startEditingReminder(_ reminder: AcademicReminder) {
+        reminderTitleInput = reminder.title
+        reminderDateInput = reminder.date
+        reminderTypeInput = reminder.type
+        includesOptionalReminder = reminder.includesOptionalReminder
+        optionalReminderOffset = reminder.optionalOffset ?? .twoDaysBefore
+        editingReminderID = reminder.id
+    }
+
+    func clearReminderForm() {
+        reminderTitleInput = ""
+        reminderDateInput = Calendar.current.date(byAdding: .day, value: 7, to: Date()) ?? Date()
+        reminderTypeInput = .exam
+        includesOptionalReminder = false
+        optionalReminderOffset = .twoDaysBefore
+        editingReminderID = nil
+    }
+
+    func deleteAcademicReminder(_ reminder: AcademicReminder) {
+        academicReminders.removeAll { $0.id == reminder.id }
+        reminderStore.save(reminders: academicReminders)
+        NotificationManager.shared.removeAcademicReminderNotifications(for: reminder.id)
+
+        if editingReminderID == reminder.id {
+            clearReminderForm()
+        }
     }
 }

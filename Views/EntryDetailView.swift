@@ -28,13 +28,10 @@ struct EntryDetailView: View {
                                 .font(.title2.bold())
                                 .foregroundStyle(AppTheme.textPrimary)
 
-                            detailCard(title: viewModel.promptOne, text: entry.learnedToday)
-                            detailCard(title: viewModel.promptTwo, text: entry.avoidedToday)
-                            detailCard(title: viewModel.promptThree, text: entry.smallWin)
-
-                            if let aiReflection = entry.aiReflection, !aiReflection.isEmpty {
-                                detailCard(title: "AI Reflection", text: aiReflection)
-                            }
+                            detailCard(title: "School", text: entry.schoolReflection)
+                            detailCard(title: "Work", text: entry.workReflection)
+                            detailCard(title: "Personal", text: entry.personalReflection)
+                            detailCard(title: "Project Lab", text: entry.projectLabReflection)
                         }
                         .padding()
                     }

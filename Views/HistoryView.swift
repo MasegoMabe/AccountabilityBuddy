@@ -22,11 +22,11 @@ struct HistoryView: View {
                             .font(.system(size: 46))
                             .foregroundStyle(AppTheme.plum)
 
-                        Text("No entries yet")
+                        Text("No reflections yet")
                             .font(.title3.bold())
                             .foregroundStyle(AppTheme.textPrimary)
 
-                        Text("Your daily check-ins will appear here.")
+                        Text("Your nightly reflections will appear here.")
                             .font(.subheadline)
                             .foregroundStyle(AppTheme.textSecondary)
                             .multilineTextAlignment(.center)
@@ -41,15 +41,19 @@ struct HistoryView: View {
                                         .font(.headline)
                                         .foregroundStyle(AppTheme.deepPlum)
 
-                                    Text("Learned: \(entry.learnedToday)")
+                                    Text("School: \(entry.schoolReflection)")
                                         .lineLimit(1)
                                         .foregroundStyle(AppTheme.textPrimary)
 
-                                    Text("Avoided: \(entry.avoidedToday)")
+                                    Text("Work: \(entry.workReflection)")
                                         .lineLimit(1)
                                         .foregroundStyle(AppTheme.textPrimary)
 
-                                    Text("Small win: \(entry.smallWin)")
+                                    Text("Personal: \(entry.personalReflection)")
+                                        .lineLimit(1)
+                                        .foregroundStyle(AppTheme.textPrimary)
+
+                                    Text("Project Lab: \(entry.projectLabReflection)")
                                         .lineLimit(1)
                                         .foregroundStyle(AppTheme.textPrimary)
                                 }
