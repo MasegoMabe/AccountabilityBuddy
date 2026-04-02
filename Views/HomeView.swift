@@ -16,7 +16,7 @@ struct HomeView: View {
     @State private var showWhyItMatters = false
 
     var body: some View {
-        NavigationStack {
+        NavigationView {
             ZStack {
                 AppTheme.background
                     .ignoresSafeArea()

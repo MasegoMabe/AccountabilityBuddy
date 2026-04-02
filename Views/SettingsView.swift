@@ -16,7 +16,7 @@ struct SettingsView: View {
     @State private var showOnboarding = false
 
     var body: some View {
-        NavigationStack {
+        NavigationView {
             ZStack {
                 AppTheme.background
                     .ignoresSafeArea()
